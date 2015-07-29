@@ -1,0 +1,33 @@
+Start testing: Jul 29 15:06 CEST
+----------------------------------------------------------
+1/1 Testing: fb_sdo_test
+1/1 Test: fb_sdo_test
+Command: "/mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/build/bin/fb_sdo_test"
+Directory: /mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/build/bin
+"fb_sdo_test" start time: Jul 29 15:06 CEST
+Output:
+----------------------------------------------------------
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+console_observer #1: [console] TEST ERROR MESSAGE!
+.
+-------------------------------------------------------------------------------
+Ran 1 tests in 0.000532s
+
+OK
+deleting console_observer: 1
+<end of output>
+Test time =   0.00 sec
+----------------------------------------------------------
+Test Passed.
+"fb_sdo_test" end time: Jul 29 15:06 CEST
+"fb_sdo_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Jul 29 15:06 CEST

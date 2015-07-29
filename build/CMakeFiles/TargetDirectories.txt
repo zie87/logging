@@ -1,0 +1,3 @@
+/mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/build/src/factory_blog/CMakeFiles/fb_sdo.dir
+/mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/build/tests/unit_tests/factory_blog/CMakeFiles/fb_sdo_test.dir
+/mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/build/CMakeFiles/unittest_modules.dir

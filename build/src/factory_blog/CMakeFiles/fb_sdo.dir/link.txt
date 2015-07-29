@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -Wall -Wextra  -Wall -Wextra -Weffc++ -g -DNDEBUG   -shared -Wl,-soname,libfb_sdo.so -o ../../lib/libfb_sdo.so CMakeFiles/fb_sdo.dir/dynamic_observer/console_observer.cpp.o CMakeFiles/fb_sdo.dir/dynamic_observer/distributor.cpp.o 

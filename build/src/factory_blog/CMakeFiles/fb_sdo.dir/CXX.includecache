@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../inc/factory_blog/dynamic_observer/././message.hpp
+string
+-
+
+../inc/factory_blog/dynamic_observer/./observer.hpp
+./message.hpp
+../inc/factory_blog/dynamic_observer/././message.hpp
+
+../inc/factory_blog/dynamic_observer/console_observer.hpp
+./observer.hpp
+../inc/factory_blog/dynamic_observer/./observer.hpp
+
+/mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/src/factory_blog/dynamic_observer/console_observer.cpp
+factory_blog/dynamic_observer/console_observer.hpp
+-
+iostream
+-
+
