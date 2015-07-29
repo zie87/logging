@@ -68,14 +68,17 @@ struct sdo_test : ut::testcase<>
 
     dist -= dist.get_observer(0);
 
-    dist += new fbdo::console_observer( sdo::level_type::error );
-    for(unsigned int i = 1; i < 10; ++i)
+    sdo::messages.clear();
+    dist += new sdo::test_observer( sdo::level_type::error );
+    for(unsigned int i = 0; i < 10; ++i)
     {
-      dist.log( fbdo::message("console", sdo::level_type::debug, "TEST DEBUG MESSAGE!") );
-      dist.log( fbdo::message("console", sdo::level_type::trace, "TEST TRACE MESSAGE!") );
-      dist.log( fbdo::message("console", sdo::level_type::event, "TEST EVENT MESSAGE!") );
-      dist.log( fbdo::message("console", sdo::level_type::error, "TEST ERROR MESSAGE!") );
+      dist.log( fbdo::message("test filter", sdo::level_type::debug, "TEST DEBUG MESSAGE!") );
+      dist.log( fbdo::message("test filter", sdo::level_type::trace, "TEST TRACE MESSAGE!") );
+      dist.log( fbdo::message("test filter", sdo::level_type::event, "TEST EVENT MESSAGE!") );
+      dist.log( fbdo::message("test filter", sdo::level_type::error, "TEST ERROR MESSAGE!") );
     } 
+    uta::assert_equal( 10, sdo::messages.size() );
+
 
   }
 };

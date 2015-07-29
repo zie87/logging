@@ -35,8 +35,6 @@ namespace dynamic_observer
       distributor();
       observer_list m_observers;
 
-      struct log_entry;
-
   };
 } // dynamic_observer
 } // factory_blog

@@ -17,7 +17,7 @@ namespace dynamic_observer
       using level_type   = level;
       using channel_type = std::string;
 
-      message( const channel_type a, const level_type l, char* s )
+      message( const channel_type a, const level_type l, const string_type& s )
       : m_text(s), m_channel(a), m_level(l)
       {}
 

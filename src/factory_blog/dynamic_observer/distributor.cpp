@@ -35,18 +35,9 @@ namespace dynamic_observer
     return *this;
   }
 
-  struct distributor::log_entry : public std::binary_function<observer *, message_type, bool> // bool is needed to make bind2nd happy
-  {
-    bool operator() (const observer * obs, const message_type & msg) const
-    {
-      if (obs->level() >= msg.level()) { obs->consume(msg); return (true); }
-      return (false);
-    }
-  };
-
   void distributor::log(const message_type& msg)
   {   
-    std::for_each(m_observers.begin(), m_observers.end(), std::bind2nd(log_entry(), msg)); 
+    std::for_each(m_observers.begin(), m_observers.end(), [&](const observer* obs){ if (obs->level() >= msg.level()) { obs->consume(msg);} });
   }
 
 
