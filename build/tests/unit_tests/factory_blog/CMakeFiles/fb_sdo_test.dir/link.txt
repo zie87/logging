@@ -1,1 +1,0 @@
-/usr/bin/c++   -Wall -Wextra  -Wall -Wextra -Weffc++ -g -DNDEBUG    CMakeFiles/fb_sdo_test.dir/dynamic_observer/sdo_test.cpp.o  -o ../../../bin/fb_sdo_test -rdynamic -lunittest -lpthread ../../../lib/libfb_sdo.so -Wl,-rpath,/mnt/IDMT-WORKSPACE/DATA-STORE/Playground/research/repos/logging/build/lib 
