@@ -4,6 +4,8 @@ ADD_LIBRARY(fb_sdo SHARED  "${CMAKE_CURRENT_SOURCE_DIR}/dynamic_observer/console
                            "${CMAKE_CURRENT_SOURCE_DIR}/dynamic_observer/distributor.cpp"
 )
 
+ADD_LIBRARY(fb_ado SHARED  "${CMAKE_CURRENT_SOURCE_DIR}/async_observer/message_queue.cpp"
+)
 
 # ADD_EXECUTABLE(prototyp ./prototyp/main.cpp ./prototyp/worker.cpp)
 # TARGET_LINK_LIBRARIES(prototyp boost_log boost_thread boost_program_options boost_chrono ${CMAKE_THREAD_LIBS_INIT})
