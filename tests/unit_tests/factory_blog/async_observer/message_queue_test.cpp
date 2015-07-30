@@ -53,7 +53,6 @@ namespace ado_mq
           m_container->push( fbso::message(m_channel, level_type::trace, "TEST MESSAGE" ) );
           std::this_thread::sleep_for(std::chrono::nanoseconds(m_sleep));
         }
-
       }
   };
 

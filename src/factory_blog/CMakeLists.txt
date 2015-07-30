@@ -5,6 +5,9 @@ ADD_LIBRARY(fb_sdo SHARED  "${CMAKE_CURRENT_SOURCE_DIR}/dynamic_observer/console
 )
 
 ADD_LIBRARY(fb_ado SHARED  "${CMAKE_CURRENT_SOURCE_DIR}/async_observer/message_queue.cpp"
+                           "${CMAKE_CURRENT_SOURCE_DIR}/async_observer/observer.cpp"
+                           "${CMAKE_CURRENT_SOURCE_DIR}/async_observer/console_observer.cpp"
+                           "${CMAKE_CURRENT_SOURCE_DIR}/async_observer/distributor.cpp"
 )
 
 # ADD_EXECUTABLE(prototyp ./prototyp/main.cpp ./prototyp/worker.cpp)
