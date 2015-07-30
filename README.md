@@ -29,3 +29,5 @@
 
 [disrubtor](https://code.google.com/p/disruptor/wiki/BlogsAndArticles)
 [disruptor-git](http://lmax-exchange.github.io/disruptor/)
+
+[Lock-free Multi-producer Multi-consumer Queue on Ring Buffer](http://natsys-lab.blogspot.de/2013/05/lock-free-multi-producer-multi-consumer.html) Source: [Here](https://github.com/krizhanovsky/NatSys-Lab/blob/master/lockfree_rb_q.cc)
