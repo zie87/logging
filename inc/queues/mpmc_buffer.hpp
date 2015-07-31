@@ -39,10 +39,11 @@ class mpmc_buffer
   public:
     using size_type   = size_t;
     using atomic_type = std::atomic<size_type>;
+    using value_type  = T;
 
     mpmc_buffer( size_type size ) 
     : m_size(size), m_mask(size - 1)
-    , m_buf(reinterpret_cast<node_t*>(new aligned_node_t[m_size]))
+    , m_buf(reinterpret_cast<node_t*>(new aligned_t[m_size]))
     , m_head_seq(0), m_tail_seq(0)
     {
       // make sure it's a power of 2
@@ -53,7 +54,7 @@ class mpmc_buffer
 
     ~mpmc_buffer(){ if(m_buf) {delete[] m_buf;} }
 
-    bool enqueue(const T& data)
+    bool push(const value_type& data) noexcept
     {
       // m_head_seq only wraps at MAX(m_head_seq) instead we use a mask to convert the sequence to an array index
       // this is why the ring buffer must be a size which is a power of 2. this also allows the sequence to double as a ticket/lock.
@@ -94,7 +95,7 @@ class mpmc_buffer
       return false; // never taken
     }
 
-    bool dequeue(T& data)
+    bool pop(value_type& data) noexcept
     {
       size_type tail_seq = m_tail_seq.load(std::memory_order_relaxed);
 
@@ -141,12 +142,12 @@ private:
 
     struct node_t
     {
-      T             data;
+      value_type    data;
       atomic_type   seq;
     };
 
     // prevent false sharing (http://stackoverflow.com/questions/8469427/how-and-when-to-align-to-cache-line-size)
-    using aligned_node_t = typename std::aligned_storage<sizeof(node_t), std::alignment_of<node_t>::value>::type;
+    using aligned_t = typename std::aligned_storage<sizeof(node_t), std::alignment_of<node_t>::value>::type;
     typedef char cache_line_pad_t[64]; // it's either 32 or 64 so 64 is good enough
 
     cache_line_pad_t  m_pad0;

@@ -40,71 +40,63 @@
 template<typename T>
 class spsc_buffer
 {
-public:
+  public:
+    using size_type   = size_t;
+    using atomic_type = std::atomic<size_type>;
+    using value_type  = T;
 
-    spsc_buffer(
-        size_t size) :
-        _size(size),
-        _mask(size - 1),
-        _buffer(reinterpret_cast<T*>(new aligned_t[_size + 1])), // need one extra element for a guard
-        _head(0),
-        _tail(0)
+    spsc_buffer( size_type size) 
+    : m_size(size), m_mask(size - 1)
+    , m_buf(reinterpret_cast<value_type*>(new aligned_t[m_size + 1])) // need one extra element for a guard 
+    , m_head(0), m_tail(0)
     {
-        // make sure it's a power of 2
-        assert((_size != 0) && ((_size & (~_size + 1)) == _size));
+      // make sure it's a power of 2
+      assert((m_size != 0) && ((m_size & (~m_size + 1)) == m_size));
     }
 
-    ~spsc_buffer()
+    ~spsc_buffer() { delete[] m_buf; }
+
+    bool push(value_type& input) noexcept
     {
-        delete[] _buffer;
+      const size_type head = m_head.load(std::memory_order_relaxed);
+
+      if (((m_tail.load(std::memory_order_acquire) - (head + 1)) & m_mask) >= 1) 
+      {
+        m_buf[head & m_mask] = input;
+        m_head.store(head + 1, std::memory_order_release);
+        return true;
+      }
+      return false;
     }
 
-    bool
-    enqueue(
-        T& input)
+    bool pop(value_type& output) noexcept
     {
-        const size_t head = _head.load(std::memory_order_relaxed);
+      const size_type tail = m_tail.load(std::memory_order_relaxed);
 
-        if (((_tail.load(std::memory_order_acquire) - (head + 1)) & _mask) >= 1) {
-            _buffer[head & _mask] = input;
-            _head.store(head + 1, std::memory_order_release);
-            return true;
-        }
-        return false;
-    }
-
-    bool
-    dequeue(
-        T& output)
-    {
-        const size_t tail = _tail.load(std::memory_order_relaxed);
-
-        if (((_head.load(std::memory_order_acquire) - tail) & _mask) >= 1) {
-            output = _buffer[_tail & _mask];
-            _tail.store(tail + 1, std::memory_order_release);
-            return true;
-        }
-        return false;
+      if (((m_head.load(std::memory_order_acquire) - tail) & m_mask) >= 1) 
+      {
+        output = m_buf[m_tail & m_mask];
+        m_tail.store(tail + 1, std::memory_order_release);
+        return true;
+      }
+      return false;
     }
 
     spsc_buffer(const spsc_buffer&)            = delete;
     spsc_buffer& operator=(const spsc_buffer&) = delete;
 
 private:
-
-    typedef typename std::aligned_storage<sizeof(T), std::alignment_of<T>::value>::type aligned_t;
+    using aligned_t =  typename std::aligned_storage<sizeof(value_type), std::alignment_of<value_type>::value>::type;
     typedef char cache_line_pad_t[64];
 
-    cache_line_pad_t    _pad0;
-    const size_t        _size;
-    const size_t        _mask;
-    T* const            _buffer;
-
-    cache_line_pad_t    _pad1;
-    std::atomic<size_t> _head;
-
-    cache_line_pad_t    _pad2;
-    std::atomic<size_t> _tail;
+    cache_line_pad_t    m_pad0;
+    const size_type     m_size;
+    const size_type     m_mask;
+    value_type* const   m_buf;
+    cache_line_pad_t    m_pad1;
+    atomic_type         m_head;
+    cache_line_pad_t    m_pad2;
+    atomic_type         m_tail;
 };
 
 #endif //QUEUES_SPSC_BUFFER_HPP

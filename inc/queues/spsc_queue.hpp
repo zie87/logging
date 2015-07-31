@@ -36,70 +36,66 @@
 template<typename T>
 class spsc_queue
 {
-public:
+  public:
+    using value_type = T;
 
-    spsc_queue() :
-        _head(reinterpret_cast<node_t*>(new node_aligned_t)),
-        _tail(_head), _back(nullptr)
+    spsc_queue() 
+    : m_head(reinterpret_cast<node_t*>(new aligned_t))
+    , m_tail(m_head), m_back(nullptr)
     {
-        _head->next = nullptr;
+      m_head->next = nullptr;
     }
 
     ~spsc_queue()
     {
-        T output;
-        while (this->dequeue(output)) {}
-        delete _head;
+      value_type output;
+      while (this->pop(output)) {}
+      delete m_head;
     }
 
-    void
-    enqueue(
-        const T& input)
+    void push(const value_type& input)
     {
-        node_t* node = reinterpret_cast<node_t*>(new node_aligned_t);
-        node->data = input;
-        node->next = nullptr;
+      node_t* node = reinterpret_cast<node_t*>(new aligned_t);
+      node->data = input;
+      node->next = nullptr;
 
-        std::atomic_thread_fence(std::memory_order_acq_rel);
-        _head->next = node;
-        _head = node;
+      std::atomic_thread_fence(std::memory_order_acq_rel);
+      m_head->next = node;
+      m_head = node;
     }
 
-    bool
-    dequeue(
-        T& output)
+    bool pop(value_type& output)
     {
-        std::atomic_thread_fence(std::memory_order_consume);
-        if (!_tail->next) {
-            return false;
-        }
+      std::atomic_thread_fence(std::memory_order_consume);
+      if (!m_tail->next) { return false; }
 
-        output = _tail->next->data;
-        std::atomic_thread_fence(std::memory_order_acq_rel);
-        _back = _tail;
-        _tail = _back->next;
+      output = m_tail->next->data;
+      std::atomic_thread_fence(std::memory_order_acq_rel);
+      m_back = m_tail;
+      m_tail = m_back->next;
 
-        delete _back;
-        return true;
+      delete m_back;
+      return true;
     }
 
     spsc_queue(const spsc_queue&)            = delete;
     spsc_queue& operator=(const spsc_queue&) = delete;
 
-private:
+  private:
 
     struct node_t
     {
-        node_t* next;
-        T       data;
+      node_t*     next;
+      value_type  data;
     };
 
-    typedef typename std::aligned_storage<sizeof(node_t), std::alignment_of<node_t>::value>::type node_aligned_t;
+    using aligned_t =  typename std::aligned_storage<sizeof(node_t), std::alignment_of<node_t>::value>::type;
+    typedef char cache_line_pad_t[64]; // it's either 32 or 64 so 64 is good enough
 
-    node_t* _head;
-    char    _cache_line[64];
-    node_t* _tail;
-    node_t* _back;
+    node_t*          m_head;
+    cache_line_pad_t m_pad;
+    node_t*          m_tail;
+    node_t*          m_back;
 };
 
 #endif

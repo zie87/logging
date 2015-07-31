@@ -35,69 +35,65 @@
 template<typename T>
 class mpsc_queue
 {
-public:
+  struct buffer_node_t;
+  public:
+    using value_type  = T;
+    using atomic_type = std::atomic<buffer_node_t*>;
 
-    mpsc_queue() :
-        _head(reinterpret_cast<buffer_node_t*>(new buffer_node_aligned_t)),
-        _tail(_head.load(std::memory_order_relaxed))
+    mpsc_queue() 
+    : m_head(reinterpret_cast<buffer_node_t*>(new aligned_t))
+    , m_tail(m_head.load(std::memory_order_relaxed))
     {
-        buffer_node_t* front = _head.load(std::memory_order_relaxed);
-        front->next.store(nullptr, std::memory_order_relaxed);
+      buffer_node_t* front = m_head.load(std::memory_order_relaxed);
+      front->next.store(nullptr, std::memory_order_relaxed);
     }
 
     ~mpsc_queue()
     {
-        T output;
-        while (this->dequeue(output)) {}
-        buffer_node_t* front = _head.load(std::memory_order_relaxed);
-        delete front;
+      value_type output;
+      while (this->pop(output)) {}
+      buffer_node_t* front = m_head.load(std::memory_order_relaxed);
+      delete front;
     }
 
-    void
-    enqueue(
-        const T& input)
+    void push(const value_type& input)
     {
-        buffer_node_t* node = reinterpret_cast<buffer_node_t*>(new buffer_node_aligned_t);
-        node->data = input;
-        node->next.store(nullptr, std::memory_order_relaxed);
+      buffer_node_t* node = reinterpret_cast<buffer_node_t*>(new aligned_t);
+      node->data = input;
+      node->next.store(nullptr, std::memory_order_relaxed);
 
-        buffer_node_t* prev_head = _head.exchange(node, std::memory_order_acq_rel);
-        prev_head->next.store(node, std::memory_order_release);
+      buffer_node_t* prevm_head = m_head.exchange(node, std::memory_order_acq_rel);
+      prevm_head->next.store(node, std::memory_order_release);
     }
 
-    bool
-    dequeue(
-        T& output)
+    bool pop(value_type& output)
     {
-        buffer_node_t* tail = _tail.load(std::memory_order_relaxed);
-        buffer_node_t* next = tail->next.load(std::memory_order_acquire);
+      buffer_node_t* tail = m_tail.load(std::memory_order_relaxed);
+      buffer_node_t* next = tail->next.load(std::memory_order_acquire);
 
-        if (next == nullptr) {
-            return false;
-        }
+      if (next == nullptr) { return false; }
 
-        output = next->data;
-        _tail.store(next, std::memory_order_release);
-        delete tail;
-        return true;
+      output = next->data;
+      m_tail.store(next, std::memory_order_release);
+      delete tail;
+      return true;
     }
 
 
     mpsc_queue(const mpsc_queue&)            = delete;
     mpsc_queue& operator=(const mpsc_queue&) = delete;
 
-private:
-
+  private:
     struct buffer_node_t
     {
-        T                           data;
-        std::atomic<buffer_node_t*> next;
+        value_type                           data;
+        atomic_type next;
     };
 
-    typedef typename std::aligned_storage<sizeof(buffer_node_t), std::alignment_of<buffer_node_t>::value>::type buffer_node_aligned_t;
+    using aligned_t = typename std::aligned_storage<sizeof(buffer_node_t), std::alignment_of<buffer_node_t>::value>::type;
 
-    std::atomic<buffer_node_t*> _head;
-    std::atomic<buffer_node_t*> _tail;
+    atomic_type m_head;
+    atomic_type m_tail;
 };
 
 #endif
