@@ -9,7 +9,7 @@
 #include <queues/spsc_buffer.hpp>
 #include <queues/mpmc_buffer.hpp>
 
-static const unsigned long counter    = 10000000ul;
+static const unsigned long counter    = 100000ul;
 static const unsigned int  iterations = 100;
 
 typedef long double measurements[iterations];

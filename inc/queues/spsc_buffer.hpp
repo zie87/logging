@@ -56,7 +56,7 @@ class spsc_buffer
 
     ~spsc_buffer() { delete[] m_buf; }
 
-    bool push(value_type& input) noexcept
+    bool push(const value_type& input) noexcept
     {
       const size_type head = m_head.load(std::memory_order_relaxed);
 
