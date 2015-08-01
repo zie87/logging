@@ -41,11 +41,13 @@ struct mpsc_queue_test : ut::testcase<>
     const queues_test::size_type queue_size = 65536;
     queue_type q;
 
+    queue_type::value_type val_array[queue_size];
+    for(unsigned int i = 0; i < queue_size; ++i) { val_array[i] = i; }
+
     auto c_future  = std::async(std::launch::async, &consumer_type, std::ref(q), queue_size);
-    auto p_made    = producer_type( std::ref(q), queue_size );
+    auto p_made    = producer_type( std::ref(q), queue_size, val_array );
 
     auto consumed = c_future.get();
-
 
     uta::assert_equal( queue_size, p_made   );
     uta::assert_equal( queue_size, consumed );
@@ -57,12 +59,20 @@ struct mpsc_queue_test : ut::testcase<>
     const queues_test::size_type queue_size = 65536;
     queue_type q;
 
+    const unsigned short producer_cnt = 4;
+    queue_type::value_type val_array[producer_cnt][queue_size/producer_cnt];
+    
+    for(unsigned short j = 0; j < producer_cnt; ++j)
+    {
+      for(unsigned int i = 0; i < queue_size/producer_cnt; ++i) { val_array[j][i] = i; }
+    }
+
     auto c_future  = std::async(std::launch::async, &consumer_type, std::ref(q), queue_size);
 
-    auto p1_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4) );
-    auto p2_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4) );
-    auto p3_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4) );
-    auto p4_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4) );
+    auto p1_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4), val_array[0] );
+    auto p2_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4), val_array[1] );
+    auto p3_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4), val_array[2] );
+    auto p4_future  = std::async(std::launch::async, &producer_type, std::ref(q), (queue_size/4), val_array[3] );
 
     auto p1 = p1_future.get();
     auto p2 = p2_future.get();

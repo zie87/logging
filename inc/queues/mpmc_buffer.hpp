@@ -54,6 +54,17 @@ class mpmc_buffer
 
     ~mpmc_buffer(){ if(m_buf) {delete[] m_buf;} }
 
+    // mpmc_buffer& operator=( mpmc_buffer&& buf )
+    // {
+    //   m_size = std::move(buf.m_size);
+    //   m_mask = std::move(buf.m_mask);
+    //   m_buf  = std::move(buf.m_buf);
+    //   m_head_seq.store( buf.m_head_seq.load() );
+    //   m_tail_seq.store( buf.m_tail_seq.load() );
+
+    //   return *this;
+    // }
+
     bool push(const value_type& data) noexcept
     {
       // m_head_seq only wraps at MAX(m_head_seq) instead we use a mask to convert the sequence to an array index

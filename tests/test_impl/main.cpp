@@ -6,7 +6,7 @@
 #include "sink.hpp"
 #include "source.hpp"
 #include "core.hpp"
-
+#include "timer.hpp"
 
 std::vector<message> message_vector;
 class vector_sink : public sink
@@ -28,41 +28,55 @@ class vector_sink : public sink
     void consume(const value_type& val) override { message_vector.push_back(val); }
 };
 
+
+void send_log_messages(source* src, unsigned int num)
+{
+  steady_timer timer;
+  for(unsigned int i = 0; i < num; ++i) { src->log(i); }
+}
+
+
 int main()
 {
-  const unsigned int count = 100000;
+  const unsigned int iterations  = 100000;
+  const unsigned int worker_cnt  = 4;
+  
   using sink_ptr = typename core::sink_ptr;
 
   sink_ptr  _sink( new vector_sink );
-  source             _source;
+  source    sources[worker_cnt];
+
+  // sources[0] = std::move( source("SOURCE_00") );
+  // sources[1] = std::move( source("SOURCE_01") );
+  // sources[2] = std::move( source("SOURCE_02") );
+  // sources[3] = std::move( source("SOURCE_03") );
 
   auto& core_inst = core::instance();
-
   core_inst.insert_sink(_sink);
 
-  // _source.start();
-  // _sink->start();
+  std::vector<std::thread> workers;
+  for( unsigned int i = 0; i < worker_cnt; ++i) 
+  { 
+    workers.push_back( std::thread(send_log_messages, &sources[i], (iterations/worker_cnt) ) );
+  }
+  for (std::thread& t: workers) { if (t.joinable()) { t.join();} }
 
-  for(unsigned int i = 0; i < count; ++i) { _source.log(i); }
 
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   core_inst.remove_sink(_sink);
   
-  // _sink.stop();
-  // _sink->flush();
-  std::cout << "size " << message_vector.size() << " should be " << count << std::endl;
+  std::cout << "size " << message_vector.size() << " should be " << iterations << std::endl;
   _sink->flush();
-  // auto vec = dynamic_cast<vector_sink*>(_sink.get())->vector();
 
   for(unsigned int i = 0; i < message_vector.size(); ++i) 
   { 
-    std::cout << message_vector[i].item << "\t"; 
-    if( i%20 == 0 ) std::cout << std::endl;
+    std::cout << message_vector[i].channel << ":" << message_vector[i].item << "\t"; 
+    if( i%10 == 0 ) std::cout << std::endl;
   }
 
 
-  std::cout << std::endl << "size " << message_vector.size() << " should be " << count << std::endl;
+  std::cout << std::endl << "size " << message_vector.size() << " should be " << iterations << std::endl;
 
 
   return 0;

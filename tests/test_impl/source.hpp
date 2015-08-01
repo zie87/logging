@@ -17,13 +17,16 @@ class source
 {
   public:
     using value_type      = message;
+    using string_type     = typename value_type::string_type;
+
     using container_type  = ::mpmc_buffer<value_type>;
     using size_type       = typename container_type::size_type;
     using mutex_type      = std::recursive_mutex;
 
-    explicit source(size_type size = 65536)
+    explicit source(const string_type& name = "default", size_type size = 65536)
     : m_container(size), m_mutex()
     , m_stop_process(true), m_process_future()
+    , m_name(name)
     {}
 
     virtual ~source()
@@ -32,6 +35,16 @@ class source
       value_type item;
       while( m_container.pop( item ) ){;}
     }
+
+    // source& operator=( source&& src )
+    // {
+    //   m_container = std::move(src.m_container);
+    //   m_stop_process.store( src.m_stop_process.load() );
+    //   // m_process_future 
+    //   m_name = std::move( src.m_name );
+
+    //   return *this;
+    // }
 
     source(const source&)            = delete;
     source& operator=(const source&) = delete;
@@ -48,12 +61,13 @@ class source
     {
       // std::unique_lock<mutex_type> lock(m_mutex);
       start();
-      while(! m_container.push(val) ) {;}
+      // while(! m_container.push(val) ) {;}
+      m_container.push(val);
       // lock.unlock();
     }
 
     // dummy!!!!
-    void log(const int& i) { log( value_type(i) ); }
+    void log(const int& i) { log( value_type(m_name.c_str(), i) ); }
 
     void start()
     {
@@ -101,6 +115,8 @@ class source
 
     std::atomic<bool>       m_stop_process;
     std::future<void>       m_process_future;
+
+    string_type             m_name;
 };
 
 #endif // TEST_IMPL_SOURCE_HPP
