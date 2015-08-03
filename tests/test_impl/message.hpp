@@ -8,7 +8,7 @@
 
 struct message
 {
-  enum class severity_level {debug, info, warning, error, critical };
+  enum class severity_level {trace = 0, debug, info, warning, error, critical };
 
   using channel_type = fixed_string_buffer<32>;
   using string_type  = fixed_string_buffer<128>;
@@ -65,7 +65,7 @@ struct message
 template< typename CharT, typename TraitsT >
 inline std::basic_ostream< CharT, TraitsT >& operator<<(std::basic_ostream< CharT, TraitsT >& out, message::severity_level l)
 {
-  static const char* const str[] = { "debug","info","warn","error","critical" };
+  static const char* const str[] = {"trace", "debug","info","warn","error","critical" };
 
   int lvl = static_cast<int>(l);
   if (static_cast< std::size_t >(lvl) < (sizeof(str) / sizeof(*str))) out << str[lvl];

@@ -1,23 +1,6 @@
 #ifndef TEST_IMPL_FIXED_SIZE_STRING_HPP
 #define TEST_IMPL_FIXED_SIZE_STRING_HPP
 
-// template< unsigned long _Size, class _CharT, class _Traits = std::char_traits<_CharT> >
-// class basic_fixed_string
-// {
-//   public:
-//     using traits_type = _Traits;
-//     using value_type  = typename traits_type::char_type;
-//     using size_type   = unsigned long;
-
-
-
-//   private:
-//     value_type m_buffer[_Size+1];
-
-
-
-// };
-
 #include <array>
 #include <cassert>
 #include <cstdio>
