@@ -29,6 +29,11 @@ void core::transfer(const message_type& msg)
   std::for_each(m_sinks.begin(), m_sinks.end(), [&](sink_ptr s){ s->receive(msg); });
 }
 
+void core::transfer(message_type&& msg)
+{   
+  std::for_each(m_sinks.begin(), m_sinks.end(), [&](sink_ptr s){ s->receive(std::move(msg)); });
+}
+
 core& core::instance()
 {
   static core instance;

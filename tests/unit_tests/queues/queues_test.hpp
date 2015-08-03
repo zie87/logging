@@ -16,6 +16,8 @@ namespace queues_test
     value_type val = value_type();
     for(; i < cnt; ++i)
     {
+      // loop is necessary -> on "lock" is none msg produced so the consumer 
+      // would get infinity calls
       while( ! fifo.push( val_array[i] ) ) { std::this_thread::yield(); }
     }
     return i;

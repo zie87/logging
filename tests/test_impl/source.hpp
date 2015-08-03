@@ -16,14 +16,16 @@
 class source
 {
   public:
-    using value_type      = message;
-    using string_type     = typename value_type::string_type;
+    using value_type       = message;
+    using channel_type     = typename value_type::channel_type;
+    using string_type      = typename value_type::string_type;
+    using level_type       = typename value_type::severity_level;
 
     using container_type  = ::mpmc_buffer<value_type>;
     using size_type       = typename container_type::size_type;
     using mutex_type      = std::recursive_mutex;
 
-    explicit source(const string_type& name = "default", size_type size = 65536)
+    explicit source(const channel_type& name = "default", size_type size = 65536)
     : m_container(size), m_mutex()
     , m_stop_process(true), m_process_future()
     , m_name(name)
@@ -62,12 +64,21 @@ class source
       // std::unique_lock<mutex_type> lock(m_mutex);
       start();
       // while(! m_container.push(val) ) {;}
-      m_container.push(val);
+      m_container.push( val );
       // lock.unlock();
     }
 
-    // dummy!!!!
-    void log(const int& i) { log( value_type(m_name.c_str(), i) ); }
+    void log(value_type&& val)
+    {
+      // std::unique_lock<mutex_type> lock(m_mutex);
+      start();
+      // while(! m_container.push(val) ) {;}
+      m_container.push( std::move(val) );
+      // lock.unlock();
+    }
+
+    void log(const string_type& i) { log( std::move( value_type(m_name, i) ) ); }
+    void log(level_type l, const string_type& i) { log( std::move( value_type(m_name, i, l) ) ); }
 
     void start()
     {
@@ -99,7 +110,7 @@ class source
         value_type val; 
         if(m_container.pop(val))
         {
-          consume(val);
+          consume(std::move(val));
         }
         lock.unlock();
       }
@@ -109,6 +120,7 @@ class source
 
   private:
     void consume(const value_type& val) { core::instance().transfer(val); }
+    void consume(value_type&& val) { core::instance().transfer(std::move(val)); }
 
     container_type          m_container;
     mutex_type              m_mutex;
@@ -116,7 +128,7 @@ class source
     std::atomic<bool>       m_stop_process;
     std::future<void>       m_process_future;
 
-    string_type             m_name;
+    channel_type             m_name;
 };
 
 #endif // TEST_IMPL_SOURCE_HPP

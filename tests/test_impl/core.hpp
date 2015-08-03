@@ -23,7 +23,7 @@ class core
     // core& operator-=(const observer* obs);
 
     void transfer(const message_type& msg);
-    // void log(message_type&& msg);
+    void transfer(message_type&& msg);
 
     bool remove_sink(const sink_ptr& sink);
     void insert_sink(const sink_ptr& sink);

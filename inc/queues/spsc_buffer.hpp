@@ -69,13 +69,27 @@ class spsc_buffer
       return false;
     }
 
+    bool push(value_type&& input) noexcept
+    {
+      const size_type head = m_head.load(std::memory_order_relaxed);
+
+      if (((m_tail.load(std::memory_order_acquire) - (head + 1)) & m_mask) >= 1) 
+      {
+        m_buf[head & m_mask] = std::move(input);
+        m_head.store(head + 1, std::memory_order_release);
+        return true;
+      }
+      return false;
+    }
+
     bool pop(value_type& output) noexcept
     {
       const size_type tail = m_tail.load(std::memory_order_relaxed);
 
       if (((m_head.load(std::memory_order_acquire) - tail) & m_mask) >= 1) 
       {
-        output = m_buf[m_tail & m_mask];
+      //   output = m_buf[m_tail & m_mask];
+        output = std::move( m_buf[m_tail & m_mask] );
         m_tail.store(tail + 1, std::memory_order_release);
         return true;
       }

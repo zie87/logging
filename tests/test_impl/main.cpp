@@ -7,6 +7,7 @@
 #include "source.hpp"
 #include "core.hpp"
 #include "timer.hpp"
+#include "fixed_string.hpp"
 
 std::vector<message> message_vector;
 class vector_sink : public sink
@@ -32,7 +33,7 @@ class vector_sink : public sink
 void send_log_messages(source* src, unsigned int num)
 {
   steady_timer timer;
-  for(unsigned int i = 0; i < num; ++i) { src->log(i); }
+  for(unsigned int i = 0; i < num; ++i) { src->log("MESSAGE"); }
 }
 
 void send_log_messages_sleep(source* src, unsigned int num, unsigned int sleep = 0)
@@ -40,8 +41,19 @@ void send_log_messages_sleep(source* src, unsigned int num, unsigned int sleep =
   steady_timer timer;
   for(unsigned int i = 0; i < num; ++i)
   { 
-    src->log(i); 
+    src->log(source::level_type::debug, "DEBUG MESSAGE"); 
     std::this_thread::sleep_for(std::chrono::nanoseconds(sleep));
+  }
+}
+
+void print_message_vector()
+{
+  for(unsigned int i = 0; i < message_vector.size(); ++i) 
+  { 
+    std::cout << "<" << message_vector[i].channel << "> : " 
+              << "[" << message_vector[i].level << "]" << " - " 
+              << message_vector[i].item << std::endl; 
+    // if( i%10 == 0 ) std::cout << std::endl;
   }
 }
 
@@ -74,13 +86,9 @@ void pool_test(unsigned int iterations)
   std::cout << "size " << message_vector.size() << " should be " << iterations << std::endl;
   _sink->flush();
 
-  // for(unsigned int i = 0; i < message_vector.size(); ++i) 
-  // { 
-  //   std::cout << message_vector[i].channel << ":" << message_vector[i].item << "\t"; 
-  //   if( i%10 == 0 ) std::cout << std::endl;
-  // }
-
+  print_message_vector();
 }
+
 
 void multi_sources( unsigned int iterations )
 {
@@ -117,21 +125,32 @@ void multi_sources( unsigned int iterations )
   std::cout << "size " << message_vector.size() << " should be " << iterations << std::endl;
   _sink->flush();
 
-  // for(unsigned int i = 0; i < message_vector.size(); ++i) 
-  // { 
-  //   std::cout << message_vector[i].channel << /*":" << message_vector[i].item <<*/ "\t"; 
-  //   if( i%10 == 0 ) std::cout << std::endl;
-  // }
-
+  print_message_vector();
 }
 
+void string_test()
+{
+    fixed_string_buffer<8> str1 = "foo";
+    fixed_string_buffer<6> str2 = "bar";
+    str1 = "foo2";
+    str2 = "bar2";
+    str1 = str2;
+    //str2 = str1; // doesn't compile, static size of 'str1'<8> is bigger than 'str2'<6>!
+    str2 = str1.c_str(); // this would assert if the actual size of 'str1'(4) is bigger than 'str2'<6>
+    printf("%s %s\n", str1.c_str(), str2.c_str());
 
+    fixed_string_buffer<20> msg;
+    msg.format("%s %s 0123456789", "Hello", "World!"); // truncated to 'Hello World! 012345'
+    printf("'%s'\n", msg.c_str());
+}
 
 
 int main()
 {
   const unsigned int iterations  = 100000;
   
+  string_test();
+
   pool_test(iterations);
   multi_sources(iterations);
 

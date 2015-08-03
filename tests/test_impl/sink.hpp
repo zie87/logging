@@ -50,6 +50,13 @@ class sink
       lock.unlock();
     }
 
+    void receive(value_type&& val)
+    {
+      std::unique_lock<mutex_type> lock(m_mutex);
+      m_container.push( std::move(val) );
+      lock.unlock();
+    }
+
     void start()
     {
       if( m_stop_process.load(std::memory_order_acquire) )

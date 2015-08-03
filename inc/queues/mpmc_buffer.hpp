@@ -106,6 +106,47 @@ class mpmc_buffer
       return false; // never taken
     }
 
+    bool push(value_type&& data) noexcept
+    {
+      // m_head_seq only wraps at MAX(m_head_seq) instead we use a mask to convert the sequence to an array index
+      // this is why the ring buffer must be a size which is a power of 2. this also allows the sequence to double as a ticket/lock.
+      size_type  head_seq = m_head_seq.load(std::memory_order_relaxed);
+
+      for (;;) 
+      {
+        node_t*   node     = &m_buf[head_seq & m_mask];
+        size_type node_seq = node->seq.load(std::memory_order_acquire);
+        intptr_t  dif      = (intptr_t) node_seq - (intptr_t) head_seq;
+        // if seq and head_seq are the same then it means this slot is empty
+        if (dif == 0) 
+        {
+          // claim our spot by moving head
+          // if head isn't the same as we last checked then that means someone beat us to the punch
+          // weak compare is faster, but can return spurious results
+          // which in this instance is OK, because it's in the loop
+          if (m_head_seq.compare_exchange_weak(head_seq, head_seq + 1, std::memory_order_relaxed))
+          {
+            // set the data
+            node->data = std::move(data);
+            // increment the sequence so that the tail knows it's accessible
+            node->seq.store(head_seq + 1, std::memory_order_release);
+            return true;
+          }
+        }
+        else if (dif < 0) 
+        {
+          // if seq is less than head seq then it means this slot is full and therefore the buffer is full
+          return false;
+        }
+        else 
+        {
+          // under normal circumstances this branch should never be taken
+          head_seq = m_head_seq.load(std::memory_order_relaxed);
+        }
+      }
+      return false; // never taken
+    }
+
     bool pop(value_type& data) noexcept
     {
       size_type tail_seq = m_tail_seq.load(std::memory_order_relaxed);
@@ -126,7 +167,8 @@ class mpmc_buffer
           if (m_tail_seq.compare_exchange_weak(tail_seq, tail_seq + 1, std::memory_order_relaxed)) 
           {
             // set the output
-            data = node->data;
+            // data = node->data;
+            data = std::move( node->data );
             // set the sequence to what the head sequence should be next time around
             node->seq.store(tail_seq + m_mask + 1, std::memory_order_release);
             return true;
