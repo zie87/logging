@@ -7,8 +7,9 @@ namespace queues_test
 {
   using size_type  = unsigned long;
 
+
   template<class Queue>
-  size_type produce(Queue& fifo, const size_type cnt, typename Queue::value_type* val_array)
+  size_type buffer_produce(Queue& fifo, const size_type cnt, typename Queue::value_type* val_array)
   {
     using value_type = typename Queue::value_type;
     size_type i = 0;
@@ -21,7 +22,7 @@ namespace queues_test
   }
 
   template<class Queue>
-  size_type produce2(Queue& fifo, const size_type cnt, typename Queue::value_type* val_array)
+  size_type queue_produce(Queue& fifo, const size_type cnt, typename Queue::value_type* val_array)
   {
     using value_type = typename Queue::value_type;
     size_type i = 0;

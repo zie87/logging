@@ -14,7 +14,7 @@ namespace spsc_queue_test_ns
 {
   using queue_type          = ::spsc_queue<::queues_test::size_type>;
   const auto& consumer_type = ::queues_test::consume<queue_type>;
-  const auto& producer_type = ::queues_test::produce2<queue_type>;
+  const auto& producer_type = ::queues_test::queue_produce<queue_type>;
 }
 
 

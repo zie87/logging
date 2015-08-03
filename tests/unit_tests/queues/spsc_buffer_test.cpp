@@ -17,7 +17,7 @@ namespace spsc_buffer_test_ns
 {
   using queue_type          = ::spsc_buffer<::queues_test::size_type>;
   const auto& consumer_type = ::queues_test::consume<queue_type>;
-  const auto& producer_type = ::queues_test::produce<queue_type>;
+  const auto& producer_type = ::queues_test::buffer_produce<queue_type>;
   const queues_test::size_type queue_size = 65536;
 }
 
@@ -74,7 +74,7 @@ struct spsc_buffer_test : ut::testcase<>
     for(unsigned int i = 0; i < queue_size; ++i) { val_array[i] = "test"; }
 
     auto c_future  = std::async(std::launch::async, &::queues_test::consume<string_queue>, std::ref(q), queue_size);
-    auto p_made    = ::queues_test::produce<string_queue>( std::ref(q), queue_size, val_array );
+    auto p_made    = ::queues_test::buffer_produce<string_queue>( std::ref(q), queue_size, val_array );
 
     auto consumed = c_future.get();
 
