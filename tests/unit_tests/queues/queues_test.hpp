@@ -1,6 +1,8 @@
 #ifndef UNIT_TESTS_QUEUE_TESTS_HPP
 #define UNIT_TESTS_QUEUE_TESTS_HPP
 
+#include <iostream>
+
 namespace queues_test
 {
   using size_type  = unsigned long;

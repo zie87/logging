@@ -6,6 +6,8 @@ namespace uta = ut::assertions;
 #include <thread>
 #include <future>
 #include <string>
+#include <chrono>
+
 
 #include <queues/spsc_buffer.hpp>
 
@@ -15,7 +17,7 @@ namespace spsc_buffer_test_ns
 {
   using queue_type          = ::spsc_buffer<::queues_test::size_type>;
   const auto& consumer_type = ::queues_test::consume<queue_type>;
-  const auto& producer_type = ::queues_test::produce2<queue_type>;
+  const auto& producer_type = ::queues_test::produce<queue_type>;
   const queues_test::size_type queue_size = 65536;
 }
 
@@ -29,7 +31,6 @@ struct spsc_buffer_test : ut::testcase<>
     
     UNITTEST_RUN(single_producer_single_consumer);
     UNITTEST_RUN(char_ptr_buffer);
-    // UNITTEST_RUN(string_buffer);
   }
 
   spsc_buffer_test() {} // executed before each test and before set_up()
@@ -49,10 +50,18 @@ struct spsc_buffer_test : ut::testcase<>
     auto c_future  = std::async(std::launch::async, &consumer_type, std::ref(q), queue_size);
     auto p_made    = producer_type( std::ref(q), queue_size, val_array );
 
-    auto consumed = c_future.get();
 
-    uta::assert_equal( queue_size, p_made   );
-    uta::assert_equal( queue_size, consumed );
+    std::chrono::milliseconds span (100);
+    if( c_future.wait_for(span) != std::future_status::timeout )
+    {
+      auto consumed = c_future.get();
+
+      uta::assert_equal( queue_size, p_made   );
+      uta::assert_equal( queue_size, consumed );
+    } else
+    {
+      uta::assert_true(false);
+    }
   }
 
   void char_ptr_buffer()
@@ -65,31 +74,13 @@ struct spsc_buffer_test : ut::testcase<>
     for(unsigned int i = 0; i < queue_size; ++i) { val_array[i] = "test"; }
 
     auto c_future  = std::async(std::launch::async, &::queues_test::consume<string_queue>, std::ref(q), queue_size);
-    auto p_made    = ::queues_test::produce2<string_queue>( std::ref(q), queue_size, val_array );
+    auto p_made    = ::queues_test::produce<string_queue>( std::ref(q), queue_size, val_array );
 
     auto consumed = c_future.get();
 
     uta::assert_equal( queue_size, p_made   );
     uta::assert_equal( queue_size, consumed );
   }
-
-  // void string_buffer()
-  // {
-  //   using namespace spsc_buffer_test_ns;
-  //   using string_queue = ::spsc_buffer<std::string>;
-  //   string_queue q(queue_size);
-
-  //   string_queue::value_type val_array[queue_size];
-  //   for(unsigned int i = 0; i < queue_size; ++i) { val_array[i] = "test"; }
-
-  //   auto c_future  = std::async(std::launch::async, &::queues_test::consume<string_queue>, std::ref(q), queue_size);
-  //   auto p_made    = ::queues_test::produce2<string_queue>( std::ref(q), queue_size, val_array );
-
-  //   auto consumed = c_future.get();
-
-  //   uta::assert_equal( queue_size, p_made   );
-  //   uta::assert_equal( queue_size, consumed );
-  // }
 };
 
 REGISTER(spsc_buffer_test) // this registers the test class

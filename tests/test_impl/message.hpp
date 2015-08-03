@@ -24,22 +24,4 @@
     const char*       channel; 
   };
 
-  /*
-  struct message
-  {
-    using string_type = std::string;
-
-    message()
-    : channel(), item()
-    {}
-
-    message(const std::string& chan, const int& i = 0)
-    : channel(chan), item(i)
-    {}
-
-    string_type       channel; 
-    unsigned int      item;
-  };
-  */
-
 #endif // TEST_IMPL_MESSAGE_HPP
