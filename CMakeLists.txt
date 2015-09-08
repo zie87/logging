@@ -49,7 +49,7 @@ ENDIF()
 # FIND BOOST
 ################################################################################
 FIND_PACKAGE (Threads)
-# FIND_PACKAGE( Boost 1.54 COMPONENTS system filesystem program_options thread serialization REQUIRED )
+FIND_PACKAGE( Boost 1.54 COMPONENTS system filesystem program_options thread serialization REQUIRED )
 
 
 ################################################################################

@@ -1,10 +1,8 @@
 PROJECT(logging)
 
-ADD_SUBDIRECTORY (factory_blog)
-
-# ADD_LIBRARY(logging SHARED  "${CMAKE_CURRENT_SOURCE_DIR}/log/distributor.cpp"
-#                             "${CMAKE_CURRENT_SOURCE_DIR}/log/observer.cpp"
-# )
+ADD_LIBRARY(logging SHARED  "${CMAKE_CURRENT_SOURCE_DIR}/log/distributor.cpp"
+                            "${CMAKE_CURRENT_SOURCE_DIR}/log/observer.cpp"
+)
 
 
 # ADD_EXECUTABLE(prototyp ./prototyp/main.cpp ./prototyp/worker.cpp)
