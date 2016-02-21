@@ -14,7 +14,7 @@
 
 #include <boost/log/common.hpp>
 #include <boost/log/sinks.hpp>
-#include <boost/log/utility/empty_deleter.hpp>
+#include <boost/core/null_deleter.hpp>
 
 
 namespace bo_log = boost::log;
@@ -220,7 +220,7 @@ int main()
   typedef  boost::shared_ptr< async_sink_t >  sink_ptr_t;
   sink_ptr_t cmd_sink( boost::make_shared< async_sink_t >() );
 
-  boost::shared_ptr<std::ostream> stream(&std::cout, bo_log::empty_deleter());
+  boost::shared_ptr<std::ostream> stream(&std::cout, boost::null_deleter());
   cmd_sink->locked_backend()->add_stream( stream );
   bo_log::core::get()->add_sink( cmd_sink );
 
